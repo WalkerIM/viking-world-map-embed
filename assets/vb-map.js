@@ -323,6 +323,23 @@
       sp.style.transform = 'rotate(' + ang.toFixed(1) + 'deg)' + flip;
     }
 
+    /* camera lock while sailing: keep the ship pinned at the visual centre of the
+       area NOT covered by the narration card. Instant (non-animated) pans every
+       frame = the map slides under a steady ship instead of chasing it. A manual
+       drag suspends the follow until the next stop. */
+    function followShip(lat, lng) {
+      if (journey && journey.followSuspended) return;
+      var z = map.getZoom();
+      var target = L.latLng(lat, lng);
+      if (card && card.classList.contains('is-open')) {
+        var ch = Math.min(card.getBoundingClientRect().height, map.getSize().y * 0.75);
+        var p = map.project(target, z); p.y += ch / 2;
+        target = map.unproject(p, z);
+      }
+      map.panTo(target, { animate: false });
+    }
+    map.on('dragstart', function () { if (journey) journey.followSuspended = true; });
+
     function stopNumber(j, i) { /* 1-based index among NON-shaping stops */
       var n = 0;
       for (var k = 0; k <= i; k++) if (!j.waypoints[k].shaping) n++;
@@ -357,6 +374,7 @@
 
     function arriveAt(i) {
       var j = journey.j, wp = j.waypoints[i];
+      journey.followSuspended = false; /* re-acquire the camera at every stop */
       if (journey.shipMk) journey.shipMk.setLatLng([wp.lat, wp.lon]);
       if (wp.shaping) { journey.dwellUntil = 0; return; } /* silent pass-through point */
       journeyCard(j, i);
@@ -393,7 +411,7 @@
         var lat = a.lat + (b.lat - a.lat) * t, lng = a.lng + (b.lng - a.lng) * t;
         journey.shipMk.setLatLng([lat, lng]);
         steerShipEl(journey.shipMk, a, b);
-        if (!map.getBounds().pad(-0.2).contains([lat, lng])) map.panTo([lat, lng], { animate: !reduceMotion });
+        followShip(lat, lng);
       }
       journey.raf = requestAnimationFrame(tickJourney);
     }
