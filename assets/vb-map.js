@@ -277,8 +277,23 @@
       else { next.style.display = 'none'; }
       card.classList.add('is-open');
     }
+    var activePinId = null;
+    function setActivePin(id) {
+      if (activePinId && markers[activePinId]) {
+        var prev = markers[activePinId].getElement();
+        if (prev) { var ps = prev.querySelector('.vb-mk'); if (ps) ps.classList.remove('is-active'); }
+        markers[activePinId].setZIndexOffset(0);
+      }
+      activePinId = id;
+      if (id && markers[id]) {
+        var el2 = markers[id].getElement();
+        if (el2) { var s2 = el2.querySelector('.vb-mk'); if (s2) s2.classList.add('is-active'); }
+        markers[id].setZIndexOffset(300);
+      }
+    }
     function closeCard() {
       if (card) card.classList.remove('is-open');
+      setActivePin(null);
       try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
     }
     function openLocation(id, pan) {
@@ -297,6 +312,7 @@
       addExplored(id);
       var mk = markers[id] && markers[id].getElement();
       if (mk) { var s = mk.querySelector('.vb-mk'); if (s) s.classList.add('is-explored'); }
+      setActivePin(id);
       if (pan) focusOn(loc.lat, loc.lon, 4.5);
       try { history.replaceState(null, '', '#' + id); } catch (e) { location.hash = id; }
     }
