@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="canonical" href="https://vikingsbrand.co/pages/viking-world-map">
+  <title>Viking World Map — VikingsBrand</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Runic&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/vb-leaflet.css">
+  <link rel="stylesheet" href="assets/vb-map.css">
+  <script src="assets/vb-leaflet.js" defer></script>
+  <script src="assets/vb-map-land.js" defer></script>
+  <script src="assets/vb-map-data.js" defer></script>
+  <script src="assets/vb-map.js" defer></script>
+</head>
+<body class="vb-embed">
+<div class="vb-map-wrap">
+  <div class="vb-map-filters" role="group" aria-label="Filter map markers">
+    <button type="button" data-vb-cat="all" aria-pressed="true">All</button>
+    <button type="button" data-vb-cat="homeland" aria-pressed="true"><svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 31 C12 31 2.6 19.6 2.6 11.8 A9.4 9.4 0 1 1 21.4 11.8 C21.4 19.6 12 31 12 31 Z" fill="#1C1A17" stroke="#f6f1e7" stroke-width="1.7"/><circle cx="12" cy="11.8" r="6.2" fill="#f6f1e7"/><path d="M8.5 14.8 L9.1 9.9 L11 11.7 L12 8.8 L13 11.7 L14.9 9.9 L15.5 14.8 Z" fill="#1C1A17"/></svg>Homelands</button>
+    <button type="button" data-vb-cat="raid" aria-pressed="true"><svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 31 C12 31 2.6 19.6 2.6 11.8 A9.4 9.4 0 1 1 21.4 11.8 C21.4 19.6 12 31 12 31 Z" fill="#8E2B22" stroke="#f6f1e7" stroke-width="1.7"/><circle cx="12" cy="11.8" r="6.2" fill="#f6f1e7"/><path d="M9.6 15.2 L14.7 8.8" stroke="#8E2B22" stroke-width="1.7" stroke-linecap="round" fill="none"/><path d="M12.4 7.5 Q15.9 6.7 17.3 9.4 Q15 10 13.6 11.7 Z" fill="#8E2B22"/></svg>Raids</button>
+    <button type="button" data-vb-cat="trade" aria-pressed="true"><svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 31 C12 31 2.6 19.6 2.6 11.8 A9.4 9.4 0 1 1 21.4 11.8 C21.4 19.6 12 31 12 31 Z" fill="#B8860B" stroke="#f6f1e7" stroke-width="1.7"/><circle cx="12" cy="11.8" r="6.2" fill="#f6f1e7"/><circle cx="12" cy="11.8" r="3.4" fill="none" stroke="#B8860B" stroke-width="1.7"/><path d="M12 9.7 v4.2" stroke="#B8860B" stroke-width="1.4" fill="none"/></svg>Trade &amp; East</button>
+    <button type="button" data-vb-cat="settlement" aria-pressed="true"><svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 31 C12 31 2.6 19.6 2.6 11.8 A9.4 9.4 0 1 1 21.4 11.8 C21.4 19.6 12 31 12 31 Z" fill="#4A6741" stroke="#f6f1e7" stroke-width="1.7"/><circle cx="12" cy="11.8" r="6.2" fill="#f6f1e7"/><path d="M8.3 12.3 L12 8.9 L15.7 12.3 V15.4 H8.3 Z" fill="#4A6741"/></svg>Settlements</button>
+    <button type="button" data-vb-cat="routes" aria-pressed="true"><svg class="pin pin--route" viewBox="0 0 24 32" aria-hidden="true"><path d="M2.5 21 C7 12 11 24 15.5 16 C18 11.6 20 11 22 12" fill="none" stroke="#8E2B22" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="3.2 3"/></svg>Routes</button>
+  </div>
+
+  <div class="vb-map-erabar">
+    <span class="vb-map-eralabel" data-vb="eralabel" aria-live="polite">⏳ Full Viking Age — 793–1066 AD</span>
+    <input type="range" data-vb="era" min="790" max="1080" step="5" value="1080"
+      aria-label="Show the Viking world as of a given year">
+    <span class="vb-map-eraends" aria-hidden="true"><i>790</i><i>1066+</i></span>
+  </div>
+
+  <div class="vb-map-toolsrow">
+    <button type="button" class="vb-map-measurebtn" data-vb="measure" aria-pressed="false">&#9875; Measure a voyage</button>
+    <p class="vb-map-measureout" data-vb="measure-out" hidden></p>
+  </div>
+
+  <div class="vb-map-journeybar">
+    <div class="vb-map-journeys" data-vb="journeys" role="group" aria-label="Guided journeys"></div>
+  </div>
+
+  <div class="vb-map-stage">
+    <div id="vb-map" role="application" aria-label="Interactive map of the Viking world" data-vb-serpent="assets/vb-sea-serpent.png" data-vb-whale="assets/vb-sea-whale.png"></div>
+    <div class="vb-map-vignette" aria-hidden="true"></div>
+    <aside class="vb-map-card" data-vb="map-card" aria-live="polite">
+      <button type="button" class="close" aria-label="Close">×</button>
+      <div class="cols">
+        <div class="c1">
+          <span class="cat"></span>
+          <h3></h3>
+          <p class="norse"></p>
+          <p class="date"></p>
+          <button type="button" class="next"></button>
+        </div>
+        <div class="c2">
+          <p class="hook"></p>
+          <p class="sum"></p>
+        </div>
+        <div class="c3">
+          <p class="gem"></p>
+          <blockquote class="q"><span class="qt"></span><cite></cite></blockquote>
+          <p class="src"></p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <p class="vb-map-attrib">Interactive map by
+    <a href="https://vikingsbrand.co/pages/viking-world-map" target="_blank" rel="noopener">VikingsBrand — The Viking World, 793–1066 AD</a>
+    · historically attested places only</p>
+</div>
+</body>
+</html>
