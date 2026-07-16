@@ -58,6 +58,8 @@ body.vb-embed { margin:0; background:#faf6ec; }
 .vb-embed .vb-map-erabar { margin-bottom:4px; max-width:none; display:flex; align-items:center; gap:10px; }
 .vb-embed .vb-map-eralabel { margin:0; white-space:nowrap; font-size:12px; }
 .vb-embed .vb-map-erabar input[type=range] { flex:1; }
+.vb-embed .vb-map-erarow { flex:1; }
+.vb-embed .vb-map-eraplay { width:28px; height:28px; font-size:10px; }
 .vb-embed .vb-map-eraends { display:none; }
 .vb-embed .vb-map-toolsrow { margin:0 0 6px; max-width:none; }
 .vb-embed .vb-map-measurebtn { padding:6px 13px; font-size:11px; }
@@ -90,6 +92,13 @@ body.vb-embed { margin:0; background:#faf6ec; }
 .vb-map-eraends { display:flex; justify-content:space-between; font-size:11px; color:var(--vb-muted);
   margin-top:-2px; font-style:normal; }
 .vb-map-eraends i { font-style:normal; }
+.vb-map-erarow { display:flex; align-items:center; gap:10px; }
+.vb-map-erarow input[type=range] { flex:1; }
+.vb-map-eraplay { flex:0 0 auto; width:34px; height:34px; border-radius:50%; cursor:pointer;
+  border:1px solid var(--vb-accent); background:var(--vb-accent); color:#fff; font-size:12px;
+  line-height:1; display:flex; align-items:center; justify-content:center; padding:0 0 0 2px; }
+.vb-map-eraplay[aria-pressed="true"] { background:#3B3630; border-color:#3B3630; padding:0; }
+.vb-map-eraplay:hover { filter:brightness(1.12); }
 
 /* ---- voyage measure tool ---- */
 .vb-map-toolsrow { text-align:center; margin:0 auto 14px; max-width:640px; }
@@ -181,6 +190,18 @@ body.vb-embed { margin:0; background:#faf6ec; }
   filter: drop-shadow(0 0 1.5px rgba(246,241,231,.9)); }
 .vb-rt-arrow svg { display:block; }
 .vb-route-line { transition: stroke-opacity .25s, stroke-width .2s; }
+
+/* ---- fullscreen ---- */
+.vb-map-fsbtn { position:absolute; z-index:600; left:11px; top:100px; width:36px; height:36px;
+  border-radius:9px; border:1.5px solid rgba(122,95,51,.55); background:#f6f1e7; color:#4a3a20;
+  font-size:17px; cursor:pointer; box-shadow:0 1px 5px rgba(28,26,23,.25);
+  display:flex; align-items:center; justify-content:center; padding:0; }
+.vb-map-fsbtn:hover { background:#fff; }
+.vb-map-stage:fullscreen { border-radius:0; }
+.vb-map-stage:fullscreen #vb-map { height:100vh; }
+.vb-map-stage.is-fakefs { position:fixed; inset:0; z-index:99999; border-radius:0; }
+.vb-map-stage.is-fakefs #vb-map { height:100vh; }
+html.vb-noscroll, html.vb-noscroll body { overflow:hidden; }
 
 /* ---- info card: bottom panel (desktop = 3 columns, mobile = bottom sheet) ---- */
 .vb-map-card { position:absolute; bottom:0; left:0; right:0; z-index:500; width:100%;

@@ -29,8 +29,11 @@
 
   <div class="vb-map-erabar">
     <span class="vb-map-eralabel" data-vb="eralabel" aria-live="polite">⏳ Full Viking Age — 793–1066 AD</span>
-    <input type="range" data-vb="era" min="790" max="1080" step="5" value="1080"
-      aria-label="Show the Viking world as of a given year">
+    <div class="vb-map-erarow">
+      <button type="button" class="vb-map-eraplay" data-vb="eraplay" aria-label="Play the timeline — watch the Viking world spread">&#9654;</button>
+      <input type="range" data-vb="era" min="790" max="1080" step="5" value="1080"
+        aria-label="Show the Viking world as of a given year">
+    </div>
     <span class="vb-map-eraends" aria-hidden="true"><i>790</i><i>1066+</i></span>
   </div>
 

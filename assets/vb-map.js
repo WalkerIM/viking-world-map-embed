@@ -513,10 +513,77 @@
     if (eraInput && !eraInput.dataset.vbWired) {
       eraInput.dataset.vbWired = '1';
       eraInput.addEventListener('input', function () {
+        stopEraPlay();
         var v = +eraInput.value;
         eraYear = v >= ERA_MAX ? Infinity : v;
         applyEra();
       });
+    }
+
+    /* ▶ era autoplay: watch the Viking world spread 793 -> 1066
+       (interval, not rAF — must keep stepping even in throttled/background tabs) */
+    var eraPlay = { timer: null, start: 0 };
+    var eraPlayBtn = document.querySelector('[data-vb="eraplay"]');
+    var ERA_MIN = eraInput ? +eraInput.min : 790;
+    var ERA_PLAY_MS = reduceMotion ? 8000 : 22000;
+    function stopEraPlay() {
+      if (eraPlay.timer) clearInterval(eraPlay.timer);
+      eraPlay.timer = null;
+      if (eraPlayBtn) { eraPlayBtn.innerHTML = '&#9654;'; eraPlayBtn.setAttribute('aria-pressed', 'false'); }
+    }
+    function tickEraPlay() {
+      var t = Math.min(1, (performance.now() - eraPlay.start) / ERA_PLAY_MS);
+      var y = Math.round((ERA_MIN + (ERA_MAX - ERA_MIN) * t) / 5) * 5;
+      if (eraInput && +eraInput.value !== y) {
+        eraInput.value = y;
+        eraYear = y >= ERA_MAX ? Infinity : y;
+        applyEra();
+      }
+      if (t >= 1) stopEraPlay();
+    }
+    if (eraPlayBtn && !eraPlayBtn.dataset.vbWired) {
+      eraPlayBtn.dataset.vbWired = '1';
+      eraPlayBtn.addEventListener('click', function () {
+        if (eraPlay.timer) { stopEraPlay(); return; }
+        stopJourney(); closeCard();
+        eraPlayBtn.innerHTML = '&#9646;&#9646;';
+        eraPlayBtn.setAttribute('aria-pressed', 'true');
+        eraPlay.start = performance.now();
+        if (eraInput) { eraInput.value = ERA_MIN; eraYear = ERA_MIN; applyEra(); }
+        eraPlay.timer = setInterval(tickEraPlay, 120);
+      });
+    }
+
+    /* ⛶ fullscreen (main page): native element fullscreen with a fixed-position fallback (iOS) */
+    var fsBtn = document.querySelector('[data-vb="fs"]');
+    var stageEl = document.querySelector('.vb-map-stage');
+    function fsRefresh() {
+      setTimeout(function () { map.invalidateSize(); }, 80);
+      var on = document.fullscreenElement === stageEl || (stageEl && stageEl.classList.contains('is-fakefs'));
+      if (fsBtn) fsBtn.textContent = on ? '✕' : '⛶';
+    }
+    if (fsBtn && stageEl && !fsBtn.dataset.vbWired) {
+      fsBtn.dataset.vbWired = '1';
+      fsBtn.addEventListener('click', function () {
+        if (document.fullscreenElement) { document.exitFullscreen(); return; }
+        if (stageEl.classList.contains('is-fakefs')) {
+          stageEl.classList.remove('is-fakefs');
+          document.documentElement.classList.remove('vb-noscroll');
+          fsRefresh(); return;
+        }
+        if (stageEl.requestFullscreen) {
+          stageEl.requestFullscreen().catch(function () {
+            stageEl.classList.add('is-fakefs');
+            document.documentElement.classList.add('vb-noscroll');
+            fsRefresh();
+          });
+        } else {
+          stageEl.classList.add('is-fakefs');
+          document.documentElement.classList.add('vb-noscroll');
+          fsRefresh();
+        }
+      });
+      document.addEventListener('fullscreenchange', fsRefresh);
     }
 
     /* ---- voyage measure tool: distance + sailing-time estimate ----
