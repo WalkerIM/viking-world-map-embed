@@ -73,6 +73,11 @@
     var land = L.layerGroup();
     window.VB_MAP_LAND.forEach(function (rings) { L.polygon(rings, glowStyle).addTo(land); });
     window.VB_MAP_LAND.forEach(function (rings) { L.polygon(rings, landStyle).addTo(land); });
+    /* river centerlines — the eastern "river roads" the Norse actually travelled */
+    if (window.VB_MAP_RIVERS) {
+      var riverStyle = { color: '#7a6a45', weight: .9, opacity: .5, interactive: false };
+      window.VB_MAP_RIVERS.forEach(function (pts) { L.polyline(pts, riverStyle).addTo(land); });
+    }
     land.addTo(map);
 
     /* ---- chart dressing: engraved sea creatures + latin sea names (decor only) ---- */
@@ -535,6 +540,33 @@
       measureOut.hidden = false;
       measureOut.innerHTML = html;
     }
+    function pointOnLand(lat, lon) {
+      function inRing(ring) {
+        var ok = false;
+        for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          var yi = ring[i][0], xi = ring[i][1], yj = ring[j][0], xj = ring[j][1];
+          if ((yi > lat) !== (yj > lat) && lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) ok = !ok;
+        }
+        return ok;
+      }
+      for (var p = 0; p < window.VB_MAP_LAND.length; p++) {
+        var rings = window.VB_MAP_LAND[p];
+        if (inRing(rings[0])) {
+          var hole = false;
+          for (var h = 1; h < rings.length; h++) if (inRing(rings[h])) { hole = true; break; }
+          if (!hole) return true;
+        }
+      }
+      return false;
+    }
+    function landFraction(A, B) {
+      var n = 32, onLand = 0;
+      for (var i = 1; i < n; i++) {
+        var t = i / n;
+        if (pointOnLand(A.lat + (B.lat - A.lat) * t, A.lng + (B.lng - A.lng) * t)) onLand++;
+      }
+      return onLand / (n - 1);
+    }
     function measurePick(loc) {
       if (!measure.a) {
         measureReset(true);
@@ -546,16 +578,23 @@
       var A = L.latLng(measure.a.lat, measure.a.lon), B = L.latLng(loc.lat, loc.lon);
       var km = map.distance(A, B) / 1000;
       var nm = km / 1.852;
-      var fair = km / 290, slow = km / 120;
       function days(d) { return d < 1 ? '&lt;1' : Math.round(d); }
-      measure.line = L.polyline([A, B], { color: '#3B3630', weight: 2, opacity: .85, dashArray: '2 7', interactive: false }).addTo(map);
-      measureHint(
-        '⚓ <strong>' + measure.a.name + ' → ' + loc.name + '</strong>: ' +
-        '≈ ' + Math.round(km).toLocaleString('en') + ' km (' + Math.round(nm).toLocaleString('en') + ' NM) as the raven flies.' +
-        '<br>Under sail: <strong>~' + days(fair) + (Math.round(fair) === Math.round(slow) ? '' : '–' + days(slow)) + ' days</strong>' +
-        ' — fair wind vs. mixed weather &amp; coasting. <span class="src">Speeds from recorded passages: Ohthere c. 890; Landnámabók (Norway→Iceland: 7 days).</span>' +
-        '<br><button type="button" data-vb="measure-again">Measure another</button>'
-      );
+      var frac = landFraction(A, B);
+      var byRiver = frac >= 0.2;
+      measure.line = L.polyline([A, B], { color: '#3B3630', weight: 2, opacity: .85, dashArray: byRiver ? '1 6' : '2 7', interactive: false }).addTo(map);
+      var head = '⚓ <strong>' + measure.a.name + ' → ' + loc.name + '</strong>: ' +
+        '≈ ' + Math.round(km).toLocaleString('en') + ' km (' + Math.round(nm).toLocaleString('en') + ' NM) as the raven flies.';
+      var body;
+      if (byRiver) {
+        body = '<br>This crossing runs largely overland — Norse travellers took the <strong>river roads and portages</strong> here, so the real route was longer than the straight line.' +
+          '<br>Reckon <strong>~' + days(km / 100) + '–' + days(km / 40) + ' days</strong> by river convoy and portage. ' +
+          '<span class="src">The full Dnieper run to Constantinople took several weeks with portages around the rapids (Constantine VII, De Administrando Imperio, c. 950).</span>';
+      } else {
+        var fair = km / 290, slow = km / 120;
+        body = '<br>Under sail: <strong>~' + days(fair) + (Math.round(fair) === Math.round(slow) ? '' : '–' + days(slow)) + ' days</strong>' +
+          ' — fair wind vs. mixed weather &amp; coasting. <span class="src">Speeds from recorded passages: Ohthere c. 890; Landnámabók (Norway→Iceland: 7 days).</span>';
+      }
+      measureHint(head + body + '<br><button type="button" data-vb="measure-again">Measure another</button>');
       var again = measureOut.querySelector('[data-vb="measure-again"]');
       if (again) again.addEventListener('click', function () { measureReset(true); measureHint('⚓ Pick a starting place on the map.'); });
       measure.a = null;
