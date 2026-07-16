@@ -66,11 +66,6 @@ body.vb-embed { margin:0; background:#faf6ec; }
   -webkit-mask-image: linear-gradient(90deg, #000 93%, transparent);
   mask-image: linear-gradient(90deg, #000 93%, transparent); }
 .vb-embed .vb-map-rose { width:64px; height:64px; right:12px; top:12px; }
-.vb-map-fullcta { position:absolute; z-index:600; right:12px; bottom:12px;
-  font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700;
-  background:var(--vb-ink); color:var(--vb-bone); padding:8px 14px; border-radius:999px;
-  text-decoration:none; box-shadow:0 2px 8px rgba(28,26,23,.35); }
-.vb-map-fullcta:hover { background:#3B3630; color:#fff; }
 .vb-map-attrib { text-align:center; font-size:12px; padding:9px 0 11px; margin:0; color:var(--vb-muted); }
 .vb-map-attrib a { color:var(--vb-accent); font-weight:600; }
 .vb-map-poster { font-size:14px; margin:14px 0 0; }
