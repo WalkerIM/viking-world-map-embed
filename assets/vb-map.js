@@ -116,7 +116,7 @@
       var n = getExplored().filter(function (id) { return byId[id]; }).length;
       elp.innerHTML = 'Explored <strong>' + n + ' / ' + DATA.locations.length + '</strong> places' +
         (n >= DATA.locations.length
-          ? ' — you have sailed the whole known world ⚔ Your reward: code <strong>VALHALLA10</strong> for 10% off in the shop.'
+          ? '. You have sailed the whole known world ⚔ Your reward: code <strong>VALHALLA10</strong> for 10% off in the shop.'
           : '');
     }
 
@@ -149,7 +149,7 @@
       var pts = j.waypoints.map(function (w) { return [w.lat, w.lon]; });
       var line = L.polyline(pts,
         { color: col, weight: 2.2, opacity: .8, className: 'vb-route-line', interactive: true });
-      line.bindTooltip('⛵ ' + j.name + ' — click to sail', { className: 'vb-mk-tip', sticky: true });
+      line.bindTooltip('⛵ ' + j.name + ': click to sail', { className: 'vb-mk-tip', sticky: true });
       line.on('click', function () { startJourney(j.id); });
       line.on('mouseover', function () { highlightRoute(j.id); });
       line.on('mouseout', function () { if (!journey) highlightRoute(null); });
@@ -266,8 +266,8 @@
         q.style.display = '';
         q.querySelector('.qt').textContent = '“' + f.quote.text + '”';
         q.querySelector('cite').innerHTML = f.quote.url
-          ? '— <a href="' + f.quote.url + '" target="_blank" rel="noopener">' + (f.quote.by || 'source') + '</a>'
-          : '— ' + (f.quote.by || '');
+          ? '<a href="' + f.quote.url + '" target="_blank" rel="noopener">' + (f.quote.by || 'source') + '</a>'
+          : (f.quote.by || '');
       } else { q.style.display = 'none'; }
       var src = card.querySelector('.src');
       if (f.src && f.src.url) { src.style.display = ''; src.innerHTML = 'Source: <a href="' + f.src.url + '" target="_blank" rel="noopener">' + f.src.title + '</a>'; }
@@ -535,8 +535,8 @@
       });
       if (eraLabel) {
         eraLabel.innerHTML = full
-          ? '⏳ Full Viking Age — 793–1066 AD'
-          : '⏳ The Viking world in <strong>' + eraYear + ' AD</strong> — ' + shown + ' of ' + DATA.locations.length + ' places attested';
+          ? '⏳ Full Viking Age: 793–1066 AD'
+          : '⏳ The Viking world in <strong>' + eraYear + ' AD</strong>: ' + shown + ' of ' + DATA.locations.length + ' places attested';
       }
     }
     function resetEra() {
@@ -672,7 +672,7 @@
       if (!measure.a) {
         measureReset(true);
         measure.a = loc;
-        measureHint('⚓ From <strong>' + loc.name + '</strong> — now pick the destination.');
+        measureHint('⚓ From <strong>' + loc.name + '</strong>. Now pick the destination.');
         return;
       }
       if (measure.a.id === loc.id) return;
@@ -681,19 +681,24 @@
       var nm = km / 1.852;
       function days(d) { return d < 1 ? '&lt;1' : Math.round(d); }
       var frac = landFraction(A, B);
-      var byRiver = frac >= 0.2;
+      /* River roads only in the east; a western line that cuts across land is still a coastal sea voyage. */
+      var eastern = A.lng >= 27 || B.lng >= 27;
+      var byRiver = frac >= 0.2 && eastern;
+      var aroundCoast = frac >= 0.2 && !eastern;
       measure.line = L.polyline([A, B], { color: '#3B3630', weight: 2, opacity: .85, dashArray: byRiver ? '1 6' : '2 7', interactive: false }).addTo(map);
       var head = '⚓ <strong>' + measure.a.name + ' → ' + loc.name + '</strong>: ' +
         '≈ ' + Math.round(km).toLocaleString('en') + ' km (' + Math.round(nm).toLocaleString('en') + ' NM) as the raven flies.';
       var body;
       if (byRiver) {
-        body = '<br>This crossing runs largely overland — Norse travellers took the <strong>river roads and portages</strong> here, so the real route was longer than the straight line.' +
+        body = '<br>This crossing runs largely overland. Norse travellers took the <strong>river roads and portages</strong> here, so the real route was longer than the straight line.' +
           '<br>Reckon <strong>~' + days(km / 100) + '–' + days(km / 40) + ' days</strong> by river convoy and portage. ' +
           '<span class="src">The full Dnieper run to Constantinople took several weeks with portages around the rapids (Constantine VII, De Administrando Imperio, c. 950).</span>';
       } else {
         var fair = km / 290, slow = km / 120;
-        body = '<br>Under sail: <strong>~' + days(fair) + (Math.round(fair) === Math.round(slow) ? '' : '–' + days(slow)) + ' days</strong>' +
-          ' — fair wind vs. mixed weather &amp; coasting. <span class="src">Speeds from recorded passages: Ohthere c. 890; Landnámabók (Norway→Iceland: 7 days).</span>';
+        body = '<br>Under sail: <strong>' + (aroundCoast ? 'at least ' : '') + '~' + days(fair) + (Math.round(fair) === Math.round(slow) ? '' : '–' + days(slow)) + ' days</strong>' +
+          ' (fair wind vs. mixed weather &amp; coasting).' +
+          (aroundCoast ? ' The straight line cuts across land, so the real voyage followed the coasts (and rivers, for inland places) and took longer.' : '') +
+          ' <span class="src">Speeds from recorded passages: Ohthere c. 890; Landnámabók (Norway→Iceland: 7 days).</span>';
       }
       measureHint(head + body + '<br><button type="button" data-vb="measure-again">Measure another</button>');
       var again = measureOut.querySelector('[data-vb="measure-again"]');
